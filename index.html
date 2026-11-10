@@ -1,60 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0d041c">
+<meta name="description" content="Basketball Arcade: flick the ball, sink the hoop, beat the clock. Four game modes, unlockable balls and courts.">
 <title>Basketball Arcade</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23f26a14'/%3E%3Cpath d='M1 16h30M16 1v30' stroke='%231b0a02' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" aria-label="Basketball arcade game"></canvas>
+  <canvas id="game" aria-label="Basketball Arcade"></canvas>
 
   <div id="ui">
-    <button id="mute" type="button" aria-label="Toggle sound">SND ON</button>
+    <button id="btn-pause" class="pause-btn hidden" type="button" data-i18n-aria="pause.aria"><i></i><i></i></button>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="banner" aria-live="polite"></div>
 
-    <section id="screen-start" class="screen">
+    <!-- HOME -->
+    <section id="screen-home" class="screen">
+      <div class="coins-pill home-coins"><span class="coin"></span><b data-coins>0</b></div>
       <div class="panel">
-        <div class="tag">60 SECOND SHOOTOUT</div>
-        <h1 class="title"><span>BASKETBALL</span><span>ARCADE</span></h1>
-        <ol class="how">
-          <li><b>1</b> DRAG a ball</li>
-          <li><b>2</b> FLICK it up at the hoop</li>
-          <li><b>3</b> 60 SECONDS &mdash; last 10 are <em>DOUBLE</em>!</li>
-        </ol>
-        <div class="hi">HIGH SCORE <b id="start-best">0</b></div>
-        <button id="btn-start" class="arcade-btn" type="button"><span class="coin"></span>INSERT COIN</button>
-        <div class="blink small">PRESS START</div>
+        <div class="tag" data-i18n="tag"></div>
+        <h1 class="title"><span data-i18n="title1"></span><span data-i18n="title2"></span></h1>
+        <button id="btn-play" class="arcade-btn" type="button"><span class="coin"></span><span data-i18n="play"></span></button>
+        <div class="menu-row">
+          <button id="btn-shop" class="round-btn" type="button">
+            <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 9h18l-2 11H5L3 9zM8 9V6a4 4 0 0 1 8 0v3"/></svg></span><em data-i18n="shop"></em></button>
+          <button id="btn-trophies" class="round-btn" type="button">
+            <span class="ic"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/></svg></span><em data-i18n="trophies"></em></button>
+          <button id="btn-settings" class="round-btn" type="button">
+            <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><em data-i18n="settings"></em></button>
+        </div>
+        <div class="hi"><span data-i18n="high"></span> <b id="home-best">0</b></div>
       </div>
     </section>
 
+    <!-- MODE SELECT -->
+    <section id="screen-modes" class="screen full hidden">
+      <header class="bar">
+        <button class="back-btn" type="button" data-back data-i18n-aria="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2 data-i18n="modes.title"></h2>
+        <span class="bar-spacer"></span>
+      </header>
+      <div id="mode-list" class="scroll"></div>
+    </section>
+
+    <!-- SHOP -->
+    <section id="screen-shop" class="screen full hidden">
+      <header class="bar">
+        <button class="back-btn" type="button" data-back data-i18n-aria="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2 data-i18n="shop.title"></h2>
+        <div class="coins-pill"><span class="coin"></span><b data-coins>0</b></div>
+      </header>
+      <div class="tabs">
+        <button id="tab-balls" type="button" data-i18n="shop.balls"></button>
+        <button id="tab-courts" type="button" data-i18n="shop.courts"></button>
+      </div>
+      <div id="shop-grid" class="scroll grid"></div>
+    </section>
+
+    <!-- TROPHIES -->
+    <section id="screen-trophies" class="screen full hidden">
+      <header class="bar">
+        <button class="back-btn" type="button" data-back data-i18n-aria="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2 data-i18n="tro.title"></h2>
+        <span class="bar-spacer"></span>
+      </header>
+      <div class="scroll">
+        <div id="stats-grid" class="stats-grid"></div>
+        <div id="ach-list" class="ach-list"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" class="screen full hidden">
+      <header class="bar">
+        <button class="back-btn" type="button" data-back data-i18n-aria="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h2 data-i18n="set.title"></h2>
+        <span class="bar-spacer"></span>
+      </header>
+      <div class="scroll settings">
+        <div class="row"><span data-i18n="set.sound"></span><button id="set-sound" class="toggle" type="button"></button></div>
+        <div class="row"><span data-i18n="set.vibration"></span><button id="set-vib" class="toggle" type="button"></button></div>
+        <div class="row col"><span data-i18n="set.lang"></span><div id="set-lang" class="seg"></div></div>
+        <div class="how">
+          <h3 data-i18n="set.how"></h3>
+          <p data-i18n="set.how1"></p><p data-i18n="set.how2"></p><p data-i18n="set.how3"></p>
+        </div>
+        <div id="reset-zone" class="reset-zone">
+          <button id="btn-reset" class="danger-btn" type="button" data-i18n="set.reset"></button>
+          <div id="reset-confirm" class="hidden">
+            <p data-i18n="set.reset.q"></p>
+            <div class="seg">
+              <button id="btn-reset-yes" class="danger-btn" type="button" data-i18n="set.delete"></button>
+              <button id="btn-reset-no" class="seg-btn" type="button" data-i18n="set.cancel"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COUNTDOWN -->
     <section id="screen-count" class="screen hidden" aria-live="assertive">
-      <div class="get-ready">GET READY</div>
+      <div class="get-ready" data-i18n="count.ready"></div>
       <div id="count-num">3</div>
     </section>
 
-    <div id="banner" aria-live="polite"></div>
-
-    <section id="screen-over" class="screen hidden">
+    <!-- PAUSE -->
+    <section id="screen-pause" class="screen hidden">
       <div class="panel">
-        <div class="tag" id="over-tag">BUZZER BEATER</div>
-        <h2 class="over-title">TIME'S UP!</h2>
-        <div class="final-label">FINAL SCORE</div>
+        <h2 class="over-title pause-title" data-i18n="pause.title"></h2>
+        <button id="btn-resume" class="arcade-btn" type="button" data-i18n="pause.resume"></button>
+        <button id="btn-restart" class="arcade-btn alt" type="button" data-i18n="pause.restart"></button>
+        <button id="btn-quit" class="arcade-btn alt" type="button" data-i18n="pause.quit"></button>
+      </div>
+    </section>
+
+    <!-- GAME OVER -->
+    <section id="screen-over" class="screen hidden">
+      <div class="panel over">
+        <div class="tag" id="over-tag"></div>
+        <h2 class="over-title" id="over-title"></h2>
+        <div class="mode-name" id="over-mode"></div>
+        <div class="final-label" data-i18n="over.final"></div>
         <div class="final" id="over-score">0</div>
-        <div id="over-new" class="newbest hidden">&#9733; NEW HIGH SCORE &#9733;</div>
-        <div class="hi">BEST <b id="over-best">0</b></div>
+        <div id="over-new" class="newbest hidden" data-i18n="over.new"></div>
+        <div class="hi"><span data-i18n="best"></span> <b id="over-best">0</b></div>
+        <div class="earned"><span class="coin"></span><b id="over-coins"></b></div>
         <div class="stats">
-          <div><b id="st-made">0</b><span>BASKETS</span></div>
-          <div><b id="st-acc">0%</b><span>ACCURACY</span></div>
-          <div><b id="st-streak">0</b><span>BEST STREAK</span></div>
+          <div><b id="st-made">0</b><span data-i18n="stat.baskets"></span></div>
+          <div><b id="st-acc">0%</b><span data-i18n="stat.accuracy"></span></div>
+          <div><b id="st-streak">0</b><span data-i18n="stat.streak"></span></div>
         </div>
-        <button id="btn-again" class="arcade-btn" type="button">PLAY AGAIN</button>
+        <button id="btn-again" class="arcade-btn" type="button" data-i18n="over.again"></button>
+        <div class="seg over-seg">
+          <button id="btn-share" class="seg-btn" type="button" data-i18n="over.share"></button>
+          <button id="btn-menu" class="seg-btn" type="button" data-i18n="over.menu"></button>
+        </div>
       </div>
     </section>
   </div>
 </div>
 
+<script src="js/content.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/physics.js"></script>
 <script src="js/input.js"></script>

@@ -1,8 +1,8 @@
 /* audio.js — every sound is synthesised with the Web Audio API (no files). */
 const Sfx = (() => {
   'use strict';
-  let ctx = null, master = null, noiseBuf = null, muted = false;
-  try { muted = localStorage.getItem('basketballarcade.muted') === '1'; } catch (e) { /* ignore */ }
+  let ctx = null, master = null, noiseBuf = null;
+  let muted = !Save.data.settings.sound;
 
   function ensure() {
     if (!ctx) {
@@ -61,7 +61,7 @@ const Sfx = (() => {
     get muted() { return muted; },
     setMuted(m) {
       muted = m;
-      try { localStorage.setItem('basketballarcade.muted', m ? '1' : '0'); } catch (e) { /* ignore */ }
+      Save.data.settings.sound = !m; Save.commit();
       if (master) master.gain.value = m ? 0 : 0.7;
     },
 
@@ -122,5 +122,24 @@ const Sfx = (() => {
         tone({ type: 'square', f0: NOTE(72 + n), dur: 0.2, vol: 0.11, delay: i * 0.11 }));
     },
     click() { tone({ type: 'square', f0: 700, dur: 0.05, vol: 0.08 }); },
+    error() { tone({ type: 'square', f0: 180, dur: 0.14, vol: 0.12 }); tone({ type: 'square', f0: 140, dur: 0.2, vol: 0.12, delay: 0.1 }); },
+    miss() { tone({ type: 'sine', f0: 220, f1: 110, dur: 0.22, vol: 0.14 }); },
+    gameover() {
+      [0, -3, -5, -9].forEach((n, i) => tone({ type: 'sawtooth', f0: NOTE(64 + n), dur: 0.3, vol: 0.12, delay: i * 0.18 }));
+    },
+  };
+})();
+
+/* Haptics: Android bridge when running inside the app, navigator.vibrate on the web. */
+const Haptics = (() => {
+  'use strict';
+  return {
+    v(ms) {
+      if (!Save.data.settings.vibration) return;
+      try {
+        if (window.AndroidApp && window.AndroidApp.vibrate) window.AndroidApp.vibrate(ms);
+        else if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms);
+      } catch (e) { /* unsupported */ }
+    },
   };
 })();

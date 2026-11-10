@@ -87,6 +87,8 @@ const Input = (() => {
     }
     canvas.addEventListener('pointerup', e => release(e, false));
     canvas.addEventListener('pointercancel', e => release(e, true));
+    // If the browser takes the pointer away (alt-tab, system gesture) never leave a ball stuck in the hand.
+    canvas.addEventListener('lostpointercapture', e => release(e, true));
     canvas.addEventListener('contextmenu', e => e.preventDefault());
 
     return {

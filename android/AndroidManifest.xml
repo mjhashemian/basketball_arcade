@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.basketballarcade.game">
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:label="Basketball Arcade"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
+        android:appCategory="game"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">

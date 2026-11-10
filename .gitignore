@@ -1,2 +1,4 @@
 android/keystore/
 android/build/
+*.idsig
+tests/e2e/out/

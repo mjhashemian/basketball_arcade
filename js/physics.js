@@ -30,6 +30,7 @@ const Physics = (() => {
     BACK_Z: 9.4,
     FRONT_Z: 1.3,
     NET_DEPTH: 0.5,
+    MISS_DEPTH: 0.7,        // a ball falling this far below the rim without scoring is a miss
     NET_DRAG: 2.2,          // how much the net slows a falling ball
     // --- throw mapping ---
     LAUNCH_ANGLE: 68 * Math.PI / 180, // fixed elevation of every throw
@@ -38,9 +39,10 @@ const Physics = (() => {
     SP_MAX: 5200,
     POWER_GAIN: 0.25,       // 1 = raw/unforgiving, lower = flatter sweet spot
     POWER_BAND: 0.5,        // size of the forgiving zone around SP_IDEAL (±50%)
+    OVERPOWER_DAMP: 0.6,    // flicks harder than ideal gain power more slowly (new players swipe too hard)
     AIM_GAIN: 0.40,         // same idea for left/right aim assist
     AIM_BAND: 0.25,         // radians
-    LEAD_ASSIST: 0.5,       // how much of a moving hoop's lead is done for you
+    LEAD_ASSIST: 1.0,       // how much of a moving hoop's lead is done for you (1 = aims at where it will be)
     AIM_DIST_BIAS: 1.03,    // >1 aims a little long (more backboard)
     // --- rack / return ---
     SLOTS_X: [-0.68, -0.34, 0, 0.34, 0.68],
@@ -112,7 +114,8 @@ const Physics = (() => {
 
     // --- power ---
     id = idealSpeed(p.x, p.y, p.z, tx, hoop.y, hoop.z, phi);
-    const r = clamp(1 + soften(sp / C.SP_IDEAL - 1, C.POWER_GAIN, C.POWER_BAND), 0.25, 1.8);
+    const d = sp / C.SP_IDEAL - 1, sd = soften(d, C.POWER_GAIN, C.POWER_BAND);
+    const r = clamp(1 + (d > 0 ? sd * C.OVERPOWER_DAMP : sd), 0.25, 1.8);
     const v = id.v * r;
 
     const ch = Math.cos(phi);
@@ -143,7 +146,7 @@ const Physics = (() => {
       vx: 0, vy: 0, vz: 0,
       state: 'ready',          // ready | held | flight | return
       rot: 0, spin: 0,
-      thrown: false, scored: false, tainted: false,
+      thrown: false, scored: false, tainted: false, missed: false,
       touchedRim: false, touchedBoard: false,
       bounces: 0, flightT: 0,
       rt: 0, rdur: 0.5, from: null, cancelled: false,
@@ -160,7 +163,7 @@ const Physics = (() => {
     function reset() {
       for (const b of balls) {
         setHome(b);
-        b.state = 'ready'; b.thrown = b.scored = b.tainted = false;
+        b.state = 'ready'; b.thrown = b.scored = b.tainted = b.missed = false;
         b.touchedRim = b.touchedBoard = false; b.bounces = 0; b.flightT = 0;
       }
       hoop.x = hoop.vx = hoop.phase = hoop.amp = hoop.ampTarget = 0;
@@ -180,16 +183,19 @@ const Physics = (() => {
       b.rdur = quick ? 0.25 : clamp(0.4 + d * 0.11, 0.5, 0.95);
     }
 
+    function markMiss(b) {
+      if (b.thrown && !b.scored && !b.missed) { b.missed = true; emit('miss', b); }
+    }
+
     function endFlight(b) {
-      const miss = b.thrown && !b.scored;
       sendHome(b, false);
-      if (miss) emit('miss', b);
+      markMiss(b);          // safety net: a ball that never fell past the net (timeout, stuck on the rim)
     }
 
     function launch(b, v) {
       b.state = 'flight';
       b.vx = v.vx; b.vy = v.vy; b.vz = v.vz;
-      b.thrown = true; b.scored = b.tainted = false;
+      b.thrown = true; b.scored = b.tainted = b.missed = false;
       b.touchedRim = b.touchedBoard = false;
       b.bounces = 0; b.flightT = 0;
       b.spin = (Math.random() - 0.5) * 6 + v.vx * 2;
@@ -293,6 +299,9 @@ const Physics = (() => {
         const cx = pxp + (b.x - pxp) - hoop.x, cz = pzp + (b.z - pzp) - hoop.z;
         if (cx * cx + cz * cz < (C.RIM_R + C.BALL_R) * (C.RIM_R + C.BALL_R)) b.tainted = true;
       }
+
+      // fell past the net without scoring => miss (reported immediately, not when it finally stops rolling)
+      if (!b.scored && b.vy < 0 && b.y < hy - C.MISS_DEPTH) markMiss(b);
 
       // floor
       if (b.y < C.BALL_R) {
