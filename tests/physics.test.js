@@ -103,12 +103,14 @@ for (const slot of [0, 2]) {
   }, lo, 80, step);
   console.log(`  aim offset (screen px at hoop height) that scores: ${span(hits, lo, step)}`);
 }
-// Very weak or very hard flicks must miss
+// Power is automatic: any normal swipe speed, soft or hard, scores when aimed well
 {
-  const { w, log } = newWorld(); shoot(w, w.balls[2], 0.5, 0); run(w, 4);
-  ok(log.scores.length === 0, 'half-speed flick falls short');
-  const t = newWorld(); shoot(t.w, t.w.balls[2], 1.7, 0); run(t.w, 5);
-  ok(t.log.scores.length === 0, '1.7x flick overshoots');
+  let all = true;
+  for (const k of [0.4, 0.6, 1.0, 1.5, 2.0, 2.6]) for (const slot of [0, 1, 2, 3, 4]) {
+    const { w, log } = newWorld(); shoot(w, w.balls[slot], k, 0); run(w, 4);
+    if (log.scores.length !== 1) { all = false; console.log('  no score at speed ratio', k, 'slot', slot); }
+  }
+  ok(all, 'soft and hard swipes (0.4x-2.6x) aimed at the hoop all score from every slot');
 }
 // Too-weak flick is rejected (ball just goes back to the rack)
 {

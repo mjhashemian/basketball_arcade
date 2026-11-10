@@ -114,7 +114,8 @@ ok(Content.COURTS.every(c => ['wall', 'floor', 'tray'].every(k => Array.isArray(
   const shoot = (k) => (w, b) => {
     const bs = P.project(b.x, b.y, b.z), hs = P.project(w.hoop.x, w.hoop.y, w.hoop.z);
     const dx = hs.x - bs.x, dy = hs.y - bs.y, l = Math.hypot(dx, dy);
-    w.launch(b, P.launchVelocity(b, w.hoop, dx / l * P.C.SP_IDEAL * k, dy / l * P.C.SP_IDEAL * k));
+    const v = P.launchVelocity(b, w.hoop, dx / l * P.C.SP_IDEAL, dy / l * P.C.SP_IDEAL);
+    w.launch(b, { vx: v.vx * k, vy: v.vy * k, vz: v.vz * k });   // power is automatic now, so scale the velocity itself for short / long throws
   };
   let r = run(shoot(1.0)); ok(r.score === 1 && r.miss === 0, 'a made basket is never also a miss');
   r = run(shoot(0.5)); ok(r.miss === 1 && r.score === 0, 'a short throw is exactly one miss');

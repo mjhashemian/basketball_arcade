@@ -19,11 +19,11 @@ function trial(amp, speed, leadFactor, powerNoise, aimNoisePx) {
   for (let t = 0; t < 4; t += C.FIXED_DT) w2.step(C.FIXED_DT);
   return made > 0;
 }
-const N = 400;
+const N = 400, AN = parseFloat(process.env.AIMNOISE || 15);
 const rate = (amp, speed, lead, pn, an) => { let k = 0; for (let i = 0; i < N; i++) if (trial(amp, speed, lead, pn, an)) k++; return Math.round(100 * k / N); };
-console.log('LEAD_ASSIST', C.LEAD_ASSIST, ' (success %, human noise: power ±8%, aim ±15px)');
+console.log('LEAD_ASSIST', C.LEAD_ASSIST, ' (success %, human noise: power ±8%, aim ±' + AN + 'px)');
 console.log('level                      no lead | half lead | full lead');
 const cfgs = JSON.parse(process.argv[3] || '[]');
 for (const [name, amp, sp] of cfgs) {
-  console.log(name.padEnd(26), String(rate(amp, sp, 0, .08, 15)).padStart(5) + '% ', String(rate(amp, sp, .5, .08, 15)).padStart(8) + '% ', String(rate(amp, sp, 1, .08, 15)).padStart(8) + '%');
+  console.log(name.padEnd(26), String(rate(amp, sp, 0, .08, AN)).padStart(5) + '% ', String(rate(amp, sp, .5, .08, AN)).padStart(8) + '% ', String(rate(amp, sp, 1, .08, AN)).padStart(8) + '%');
 }

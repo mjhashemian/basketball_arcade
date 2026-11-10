@@ -37,12 +37,10 @@ const Physics = (() => {
     SP_IDEAL: 1900,         // flick speed (logical px/s) that hits dead centre
     SP_MIN: 380,            // slower than this = ball is just put back
     SP_MAX: 5200,
-    POWER_GAIN: 0.25,       // 1 = raw/unforgiving, lower = flatter sweet spot
-    POWER_BAND: 0.5,        // size of the forgiving zone around SP_IDEAL (±50%)
-    OVERPOWER_DAMP: 0.6,    // flicks harder than ideal gain power more slowly (new players swipe too hard)
-    AIM_GAIN: 0.40,         // same idea for left/right aim assist
+    POWER_SWAY: 0.012,       // swipe speed barely matters: the throw is auto-powered to reach the hoop; a full-range swipe only shifts power by +-1.2%
+    AIM_GAIN: 0.9,         // same idea for left/right aim assist
     AIM_BAND: 0.25,         // radians
-    LEAD_ASSIST: 1.0,       // how much of a moving hoop's lead is done for you (1 = aims at where it will be)
+    LEAD_ASSIST: 0.5,       // how much of a moving hoop's lead is done for you (1 = aims at where it will be)
     AIM_DIST_BIAS: 1.03,    // >1 aims a little long (more backboard)
     // --- rack / return ---
     SLOTS_X: [-0.68, -0.34, 0, 0.34, 0.68],
@@ -114,8 +112,8 @@ const Physics = (() => {
 
     // --- power ---
     id = idealSpeed(p.x, p.y, p.z, tx, hoop.y, hoop.z, phi);
-    const d = sp / C.SP_IDEAL - 1, sd = soften(d, C.POWER_GAIN, C.POWER_BAND);
-    const r = clamp(1 + (d > 0 ? sd * C.OVERPOWER_DAMP : sd), 0.25, 1.8);
+    // power is automatic: a hard or soft swipe only nudges it, so the player concentrates on aim
+    const r = 1 + clamp(sp / C.SP_IDEAL - 1, -1, 1) * C.POWER_SWAY;
     const v = id.v * r;
 
     const ch = Math.cos(phi);

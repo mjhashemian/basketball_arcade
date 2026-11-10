@@ -16,7 +16,7 @@ No frameworks, no build step, no external assets. Open `index.html` to run it.
 
 ## Rules to keep
 - A basket counts only on a downward crossing of the rim plane. A ball that goes up through the hoop is disqualified for that flight (`tainted`). Do not weaken this; the test suite checks it.
-- Throw feel is tuned by `LAUNCH_ANGLE`, `SP_IDEAL`, `POWER_GAIN`, `AIM_GAIN`, `LEAD_ASSIST`, `OVERPOWER_DAMP`. After changing any, run both physics/logic tests and `node tests/balance.js`: a static hoop should score ~85% with human-like noise, moving stages ~55-65% when the hoop is led well and ~10-25% when it is ignored.
+- Throw feel is tuned by `LAUNCH_ANGLE`, `SP_IDEAL`, `POWER_SWAY`, `AIM_GAIN`, `LEAD_ASSIST`. Power is automatic (the throw is solved to reach the hoop; swipe speed only shifts it by +-`POWER_SWAY`), so skill is aim. After changing any, run both physics/logic tests and `node tests/balance.js`: with `AIMNOISE=30 node tests/balance.js` a static hoop should score ~85% (about 60% at AIMNOISE=50) and the moving stage ~35% with a half lead, moving stages ~55-65% when the hoop is led well and ~10-25% when it is ignored.
 - Persian is RTL: no letter-spacing, skew or text-stroke on Arabic script (see the `html[lang="fa"]` block in `style.css`), and canvas numbers like `+4` are drawn LTR.
 - Never add network calls, analytics or extra permissions: the store listing promises none (only `VIBRATE`).
 - Keep the logical canvas 600×900 (2:3). Pointer coordinates are converted to it in `input.js`.
