@@ -6,7 +6,9 @@ const Renderer = (() => {
   const TAU = Math.PI * 2;
   const NET_ROWS = 5, NET_COLS = 12;
   const WALL_Z = 9.6;
-  const FONT = '"Impact","Haettenschweiler","Arial Narrow Bold","Arial Black","Tahoma","Noto Sans Arabic",sans-serif';
+  // DM Sans for Latin, IRANYekan for Persian (families are declared in style.css)
+  const F = () => document.documentElement.lang === 'fa' ? '"BA Persian","BA Sans",Tahoma,sans-serif' : '"BA Sans","BA Persian","Segoe UI",Tahoma,sans-serif';
+  if (typeof document !== 'undefined' && document.fonts && document.fonts.load) ['"BA Sans"', '"BA Persian"'].forEach(f => document.fonts.load('16px ' + f).catch(() => {}));   // canvas text needs them loaded up front
   const tr = (k, v) => I18n.t(k, v);
 
   const COL = {
@@ -325,7 +327,7 @@ const Renderer = (() => {
     ctx.strokeStyle = labelCol || color; ctx.lineWidth = 2.5; ctx.shadowColor = labelCol || color; ctx.shadowBlur = 8;
     rrect(ctx, x, y, w, h, 10); ctx.fill(); ctx.stroke();
     ctx.restore();
-    ctx.fillStyle = labelCol || color; ctx.font = `15px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = labelCol || color; ctx.font = `15px ${F()}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(label, x + w / 2, y + 19);
     const dh = h - 40, lw = ledWidth(str.replace('.', '').length + (str.includes('.') ? 0.4 : 0), dh);
     led(str, x + (w - lw) / 2, y + 28, dh, color, blinkOn);
@@ -336,7 +338,7 @@ const Renderer = (() => {
     ctx.fillStyle = '#07030f'; ctx.strokeStyle = '#ff8f7a'; ctx.lineWidth = 2.5; ctx.shadowColor = '#ff8f7a'; ctx.shadowBlur = 8;
     rrect(ctx, x, y, w, h, 10); ctx.fill(); ctx.stroke();
     ctx.restore();
-    ctx.fillStyle = '#ff8f7a'; ctx.font = `15px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#ff8f7a'; ctx.font = `15px ${F()}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(tr('hud.strikes'), x + w / 2, y + 19);
     const n = s.mode.lives, left = Math.max(0, s.lives), r = 17, gap = 50;
     for (let i = 0; i < n; i++) {
@@ -401,7 +403,7 @@ const Renderer = (() => {
     const pulse = 1 + (REDUCE ? 0 : 0.06 * Math.sin(s.t * 12));
     const hot = s.streak >= 5;
     ctx.translate(18, 214); ctx.scale(pulse, pulse);
-    ctx.font = `34px ${FONT}`;
+    ctx.font = `34px ${F()}`;
     ctx.lineWidth = 6; ctx.strokeStyle = '#1a0630'; ctx.lineJoin = 'round';
     const txt = tr(hot ? 'fire' : 'streak', { n: s.streak });
     ctx.strokeText(txt, 0, 0);
@@ -427,7 +429,7 @@ const Renderer = (() => {
     ctx.beginPath(); ctx.arc(fx, fy, 22, 0, TAU); ctx.fill();
     ctx.restore();
     ctx.save();
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `30px ${FONT}`; ctx.lineJoin = 'round';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `30px ${F()}`; ctx.lineJoin = 'round';
     ctx.lineWidth = 7; ctx.strokeStyle = '#1a0630'; ctx.strokeText(tr('hint'), W / 2, 596);
     ctx.fillStyle = '#ffe14d'; ctx.shadowColor = '#ffb000'; ctx.shadowBlur = 10; ctx.fillText(tr('hint'), W / 2, 596);
     ctx.restore();
@@ -481,7 +483,7 @@ const Renderer = (() => {
       const pop = age < 0.12 ? 0.6 + age / 0.12 * 0.6 : 1.2 - Math.min(0.2, (age - 0.12) * 0.5);
       ctx.save(); ctx.translate(p.x, p.y); ctx.scale(pop, pop);
       ctx.globalAlpha = Math.min(1, p.life / (p.max * 0.35));
-      ctx.font = `${p.size}px ${FONT}`;
+      ctx.font = `${p.size}px ${F()}`;
       ctx.direction = /^[+\d]/.test(p.text) ? 'ltr' : I18n.dir;   // "+4" must not be mirrored in RTL
       ctx.lineWidth = p.size * 0.2; ctx.strokeStyle = '#1a0630'; ctx.strokeText(p.text, 0, 0);
       ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 14; ctx.fillText(p.text, 0, 0);

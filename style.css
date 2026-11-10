@@ -1,6 +1,13 @@
 /* Basketball Arcade — DOM overlay + page chrome.
    Everything inside #stage is sized in `em`, where 1em = 10 logical game pixels
    (ui.js sets #stage font-size so the whole UI scales with the canvas). */
+/* Fonts: DM Sans for Latin, IRANYekan for Persian. Bundled in assets/fonts (no network). Each family is pinned to one weight file
+   so every font-weight in the UI resolves to it (the UI sets font-weight: normal on headings). */
+@font-face { font-family: "BA Sans"; src: url("assets/fonts/dm_sans/dm-sans-latin-700-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "BA Sans Text"; src: url("assets/fonts/dm_sans/dm-sans-latin-500-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "BA Persian"; src: url("assets/fonts/iranyekan/IRANYekanX-Bold.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "BA Persian Text"; src: url("assets/fonts/iranyekan/IRANYekanX-Medium.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+
 :root {
   --bg: #0d041c;
   --magenta: #ff2e93;
@@ -10,7 +17,8 @@
   --mint: #3df5c1;
   --ink: #1a0630;
   --muted: #cdb6ff;
-  --display: "Impact", "Haettenschweiler", "Arial Narrow Bold", "Arial Black", "Tahoma", "Noto Sans Arabic", sans-serif;
+  --display: "BA Sans", "BA Persian", "Segoe UI", Tahoma, sans-serif;
+  --text: "BA Sans Text", "BA Persian Text", "Segoe UI", Tahoma, sans-serif;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -67,12 +75,12 @@ body {
 
 .title { margin: 0; display: flex; flex-direction: column; align-items: center; line-height: .88; font-weight: normal; transform: skew(-6deg); }
 .title span:first-child {
-  font-size: 5.2em; color: var(--yellow); white-space: nowrap;
+  font-size: 3.7em; color: var(--yellow); white-space: nowrap;
   text-shadow: 0 .04em 0 #ff9d00, 0 .08em 0 #ff6a00, 0 .12em 0 #c8340a, 0 .16em 0 var(--ink), 0 0 .5em rgba(255,200,0,.6);
   -webkit-text-stroke: .03em var(--ink);
 }
 .title span:last-child {
-  font-size: 8.4em; color: #fff; letter-spacing: .02em; white-space: nowrap;
+  font-size: 6.3em; color: #fff; letter-spacing: .02em; white-space: nowrap;
   text-shadow: 0 0 .1em var(--magenta), 0 0 .3em var(--magenta), 0 0 .7em var(--magenta), 0 .06em 0 #b3126a;
   -webkit-text-stroke: .02em var(--magenta);
 }
@@ -139,7 +147,7 @@ html[dir="rtl"] .back-btn svg { transform: scaleX(-1); }
 .card .ic { width: 6.4em; height: 6.4em; flex: none; }
 .card .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3em; }
 .card .n { font-size: 2.8em; color: var(--yellow); line-height: 1.1; }
-.card .d { font-size: 1.7em; color: var(--muted); line-height: 1.3; font-family: var(--display); }
+.card .d { font-size: 1.7em; color: var(--muted); line-height: 1.3; font-family: var(--text); }
 .card .b { display: flex; flex-direction: column; align-items: center; font-size: 1.4em; color: var(--mint); flex: none; min-width: 5em; }
 .card .b b { font-weight: normal; font-size: 2.4em; color: #fff; }
 
@@ -193,10 +201,10 @@ html[dir="rtl"] .back-btn svg { transform: scaleX(-1); }
 .settings .seg { font-size: 1em; }
 .how { padding: 1em 1.4em; margin-bottom: 1em; border-radius: 1em; background: rgba(40,18,80,.6); }
 .how h3 { margin: 0 0 .5em; font-weight: normal; font-size: 2.2em; color: var(--cyan); }
-.how p { margin: .4em 0; font-size: 1.7em; color: #e9dcff; line-height: 1.45; font-family: var(--display); }
+.how p { margin: .4em 0; font-size: 1.7em; color: #e9dcff; line-height: 1.45; font-family: var(--text); }
 .danger-btn { font-size: 2em; padding: .4em 1em; border-radius: .6em; border: .1em solid #ff5a4d; background: rgba(120,20,20,.55); color: #ffb3ab; }
 .reset-zone { display: flex; flex-direction: column; align-items: center; gap: .8em; padding: 1em 0 2em; }
-.reset-zone p { font-size: 1.8em; text-align: center; margin: .4em 0 .8em; color: #ffd6d1; font-family: var(--display); }
+.reset-zone p { font-size: 1.8em; text-align: center; margin: .4em 0 .8em; color: #ffd6d1; font-family: var(--text); }
 .seg-btn { font-size: 2.2em; padding: .4em 1em; border-radius: .6em; border: .1em solid var(--cyan); background: rgba(0,0,0,.4); }
 
 /* ---------- countdown ---------- */
@@ -210,10 +218,10 @@ html[dir="rtl"] .back-btn svg { transform: scaleX(-1); }
 .pause-btn i { width: .6em; height: 1.8em; background: var(--cyan); border-radius: .2em; }
 html[dir="rtl"] .pause-btn { inset-inline-start: auto; left: 1.4em; }
 
-#banner { position: absolute; left: 0; right: 0; top: 30%; text-align: center; pointer-events: none; font-size: 7.6em; line-height: 1; letter-spacing: .04em; opacity: 0; transform: skew(-6deg); color: #fff; -webkit-text-stroke: .03em var(--ink); white-space: nowrap; text-shadow: 0 0 .15em var(--magenta), 0 0 .5em var(--magenta), 0 .06em 0 #b3126a; }
+#banner { position: absolute; left: 0; right: 0; top: 30%; text-align: center; pointer-events: none; font-size: 6em; line-height: 1; letter-spacing: .04em; opacity: 0; transform: skew(-6deg); color: #fff; -webkit-text-stroke: .03em var(--ink); white-space: nowrap; text-shadow: 0 0 .15em var(--magenta), 0 0 .5em var(--magenta), 0 .06em 0 #b3126a; }
 #banner.show { animation: banner 1.6s ease-out forwards; }
 #banner.cyan { text-shadow: 0 0 .15em var(--cyan), 0 0 .5em var(--cyan), 0 .06em 0 #0a8793; }
-#banner.small-banner { font-size: 5.4em; }
+#banner.small-banner { font-size: 4.4em; }
 @keyframes banner {
   0% { opacity: 0; transform: skew(-6deg) translateX(-120%) scale(1.1); }
   18% { opacity: 1; transform: skew(-6deg) translateX(0) scale(1.08); }
@@ -248,8 +256,11 @@ html[dir="rtl"] .pause-btn { inset-inline-start: auto; left: 1.4em; }
 @keyframes blink { to { visibility: hidden; } }
 
 /* ---------- Persian: Arabic script must not be letter-spaced, skewed or upper-cased ---------- */
+html[lang="fa"] { --display: "BA Persian", "BA Sans", Tahoma, sans-serif; --text: "BA Persian Text", "BA Sans Text", Tahoma, sans-serif; }
 html[lang="fa"] *, html[lang="fa"] *::before { letter-spacing: 0 !important; }
 html[lang="fa"] .title, html[lang="fa"] .over-title, html[lang="fa"] #banner { transform: none; -webkit-text-stroke-width: 0; }
+html[lang="fa"] #banner { font-size: 7.6em; }
+html[lang="fa"] #banner.small-banner { font-size: 5.4em; }
 html[lang="fa"] #banner.show { animation-name: banner-fa; }
 @keyframes banner-fa { 0% { opacity: 0; transform: translateX(-120%); } 18%, 78% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateX(120%); } }
 html[lang="fa"] .title span:first-child { font-size: 6.6em; }
@@ -257,7 +268,7 @@ html[lang="fa"] .title span:last-child { font-size: 7.6em; }
 html[lang="fa"] .over-title { font-size: 7em; }
 html[lang="fa"] .card .n { font-size: 2.6em; }
 html[lang="fa"] .final-label, html[lang="fa"] .tag { font-size: 2.2em; }
-html[lang="es"] .title span:first-child { font-size: 4.6em; }
+html[lang="es"] .title span:first-child { font-size: 3.3em; }
 html[lang="es"] .over-title { font-size: 7em; }
 
 /* ---------- reduced motion: no pulsing / blinking / sliding ---------- */

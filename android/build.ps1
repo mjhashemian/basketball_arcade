@@ -22,6 +22,8 @@ New-Item -ItemType Directory "$out\cls", "$out\dex", "$out\assets\www" | Out-Nul
 # web assets (only what the game needs)
 Copy-Item "$root\index.html", "$root\style.css" "$out\assets\www"
 Copy-Item "$root\js" "$out\assets\www\js" -Recurse
+New-Item -ItemType Directory "$out\assets\www\assets" | Out-Null
+Copy-Item "$root\assets\fonts" "$out\assets\www\assets\fonts" -Recurse   # bundled fonts, loaded by style.css
 
 # resources + manifest
 Run 'aapt2 compile' { & "$bt\aapt2.exe" compile --dir "$a\res" -o "$out\res.zip" }
