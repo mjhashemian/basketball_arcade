@@ -5,6 +5,8 @@ const Input = (() => {
   const { W, H, project, unproject } = Physics;
   const C = Physics.C;
   const VEL_WINDOW = 110;                // ms of pointer history used for the flick
+  const MIN_FLICK_MS = 55;               // shortest time a flick is measured over (ms)
+  const MIN_FLICK_DIST = 60;             // logical px the finger must travel in the window to count as a throw
 
   function init(canvas, world, h) {
     const drags = new Map();             // pointerId -> {ball, offX, offY, samples}
@@ -50,8 +52,12 @@ const Input = (() => {
       if (j === n - 1) j = n - 2;
       const a = samples[j];
       // dividing by time-to-release means pausing before letting go kills the throw
-      const dt = Math.max(tRel - a.t, 16) / 1000;
-      return { vx: (last.x - a.x) / dt, vy: (last.y - a.y) / dt };
+      // The floor on dt stops a tiny twitch (a few px in one frame) from reading as a hard flick.
+      const dt = Math.max(tRel - a.t, MIN_FLICK_MS) / 1000;
+      const dx = last.x - a.x, dy = last.y - a.y;
+      // a real throw needs a real swipe: short movements just put the ball back
+      if (Math.hypot(dx, dy) < MIN_FLICK_DIST) return { vx: 0, vy: 0 };
+      return { vx: dx / dt, vy: dy / dt };
     }
 
     canvas.addEventListener('pointerdown', e => {
